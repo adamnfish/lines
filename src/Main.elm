@@ -54,14 +54,16 @@ lotsOfLines : Float -> List Picture
 lotsOfLines angle =
     let
         axisCount =
-            50
+            70
 
         boxSize =
             1000 // axisCount
 
         adjustedAngle : Int -> Int -> Float -> Float
         adjustedAngle xi yi oldAngle =
-            oldAngle * toFloat (xi - axisCount) * toFloat (yi - axisCount)
+            oldAngle
+                + (0.5 * toFloat (xi - axisCount))
+                + (0.4 * toFloat (yi - axisCount))
     in
     List.concatMap
         (\xi ->
@@ -117,7 +119,7 @@ update msg model =
                     model.time + delta
 
                 newAngle =
-                    newTime / 10000
+                    newTime / 100
             in
             ( { model
                 | time = newTime
