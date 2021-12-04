@@ -87,16 +87,7 @@ init =
       , canvasElement =
             emptyViewport
       }
-    , Task.attempt
-        (\r ->
-            case r of
-                Ok element ->
-                    UpdateViewportInfo element
-
-                Err error ->
-                    NoOp
-        )
-        (Browser.Dom.getElement "art-canvas")
+    , updateCanvasOffset ()
     )
 
 
@@ -204,6 +195,7 @@ type Msg
     | Tick Float
     | Perturb Float Float
     | UpdateViewportInfo Browser.Dom.Element
+    | Resized
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -250,6 +242,25 @@ update msg model =
               }
             , Cmd.none
             )
+
+        Resized ->
+            ( model
+            , updateCanvasOffset ()
+            )
+
+
+updateCanvasOffset : () -> Cmd Msg
+updateCanvasOffset _ =
+    Task.attempt
+        (\r ->
+            case r of
+                Ok element ->
+                    UpdateViewportInfo element
+
+                Err error ->
+                    NoOp
+        )
+        (Browser.Dom.getElement "art-canvas")
 
 
 
@@ -327,5 +338,10 @@ main =
         { view = view
         , init = \_ -> init
         , update = update
-        , subscriptions = always <| Browser.Events.onAnimationFrameDelta Tick
+        , subscriptions =
+            always <|
+                Sub.batch
+                    [ Browser.Events.onAnimationFrameDelta Tick
+                    , Browser.Events.onResize (\_ _ -> Resized)
+                    ]
         }
